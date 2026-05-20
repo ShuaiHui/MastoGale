@@ -5,9 +5,6 @@ PREFiX
 
 **作者:** @锐风 https://fanfou.com/ruif
 
-安装
---
-**Chrome 应用商店地址:** https://is.gd/PREFiX
 
 版本历史
 ----
