@@ -72,4 +72,13 @@ PREFiX
 * 增加虾米封面显示和一键打开虾米播放器功能
 * 大幅优化滚动性能, 解决消息较多时滚动卡顿的问题
 
+**ver 1.0.0 (Manifest V3 完美适配版)**
+* **全面迁移至 Manifest V3 架构**：完美适配 Chrome 2025 MV2 停用时间线，升级扩展安全性与性能。
+* **后台 Service Worker 重构**：将原有的 Persistent Background Page 重构为非持久化 Service Worker，降低了内存占用。
+* **MV3 存储兼容垫片**：为 Popup 和 Options 页面构建了基于 `chrome.storage.local` 异步加载的同步 `localStorage` Proxy 代理，确保老版本用户数据的平滑过渡。
+* **安全沙箱模板表达式解释器**：实现了一套符合 MV3 CSP（无 `'unsafe-eval'` 限制）的轻量级 avalon.js 模板表达式解释器，完美兼容原项目的数据双向绑定语法（`ms-duplex` 等）。
+* **Service Worker 网络垫片**：实现了 `MockXMLHttpRequest`，使用 `fetch()` 重新封装以替代 Service Worker 中已被剔除的 `XMLHttpRequest`，完美适配 OAuth 1.0a 签名验证库 `ripple.js`。
+* **声音与通知适配**：引入 Offscreen Document 解决 Service Worker 下原生 DOM 播放 `dongdong.mp3` 的限制，并采用 `chrome.notifications` 重构了桌面通知弹窗，修复了原生 `Notification` 构造器报错。
+* **竞态与稳定性修复**：完美修复了 Popup 在 MV3 独立作用域下的各种 DOM Ready 初始化竞态报错、滚动条位置抖动，并移除了 avalon.js 内部的 `setTimeout("string")` 动态求值警告。
+
 基于开源项目 [Ripple](https://github.com/riophae/Ripple), [Avalon](https://github.com/RubyLouvre/avalon), [jQuery](https://github.com/jquery/jquery) 开发.
