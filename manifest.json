@@ -1,0 +1,75 @@
+{
+	"manifest_version": 3,
+	"name": "PREFiX",
+	"version": "1.0.0",
+	"description": "简洁、易用的饭否客户端.",
+	"icons": {
+		"256": "icons/256.png",
+		"128": "icons/128.png",
+		"48": "icons/48.png",
+		"40": "icons/40.png",
+		"38": "icons/38.png",
+		"19": "icons/19.png",
+		"16": "icons/16.png"
+	},
+	"background": {
+		"service_worker": "service-worker.js"
+	},
+	"content_scripts": [ {
+		"js": [ "js/lib/jquery-min.js", "js/consumer-helper.js" ],
+		"matches": [ "https://fanfou.com/apps.details/*" ],
+		"run_at": "document_end"
+	} ],
+	"action": {
+		"default_icon": {
+			"38": "icons/38.png",
+			"19": "icons/19.png"
+		},
+		"default_popup": "popup.html",
+		"default_title": "PREFiX"
+	},
+	"options_page": "options.html",
+	"omnibox": { "keyword": "f" },
+	"permissions": [
+		"tabs",
+		"contextMenus",
+		"notifications",
+		"offscreen",
+		"storage",
+		"scripting"
+	],
+	"host_permissions": [
+		"http://fanfou.com/",
+		"https://fanfou.com/",
+		"http://*.fanfou.com/",
+		"https://*.fanfou.com/",
+		"http://*.sinaimg.cn/",
+		"https://*.sinaimg.cn/",
+		"https://*.xiaonei.com/",
+		"http://*.xiaonei.com/",
+		"https://*.yxlady.com/",
+		"http://*.yxlady.com/",
+		"https://*.duoshuo.com/",
+		"http://*.duoshuo.com/",
+		"https://img.xiami.net/",
+		"http://img.xiami.net/",
+		"https://*.sharetome.com/",
+		"http://*.sharetome.com/",
+		"https://*.qlogo.cn/",
+		"http://*.qlogo.cn/",
+		"https://*.douban.com/",
+		"http://*.douban.com/",
+		"http://riophae.github.io/",
+		"https://riophae.github.io/"
+	],
+	"web_accessible_resources": [
+		{
+			"resources": ["manifest.json"],
+			"matches": ["<all_urls>"]
+		}
+	],
+	"content_security_policy": {
+		"extension_pages": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://s3.meituan.net https://s3-img.meituan.net https://*.sinaimg.cn; connect-src 'self' data: https://fanfou.com https://*.fanfou.com"
+	},
+	"minimum_chrome_version": "88"
+}
