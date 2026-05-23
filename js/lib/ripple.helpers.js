@@ -436,8 +436,17 @@ Deferred.define = function (obj, list) {
 	}
 	return Deferred;
 };
-
-this.Deferred = this.Ripple.Deferred = Deferred;
+var globalCtx = (typeof globalThis !== 'undefined' ? globalThis : (typeof self !== 'undefined' ? self : this));
+globalCtx.Deferred = Deferred;
+globalCtx.Ripple = globalCtx.Ripple || {};
+globalCtx.Ripple.Deferred = Deferred;
+globalCtx.Ripple.helpers = globalCtx.Ripple.helpers || {};
+globalCtx.Ripple.helpers.isFunction = globalCtx.Ripple.helpers.isFunction || function(val) {
+	return typeof val === 'function';
+};
+globalCtx.Ripple.helpers.isString = globalCtx.Ripple.helpers.isString || function(val) {
+	return typeof val === 'string';
+};
 
 
 /*

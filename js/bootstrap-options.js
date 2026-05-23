@@ -271,9 +271,8 @@
         var scripts = [
             "js/lib/jquery-min.js",
             "js/lib/underscore-min.js",
-            "js/lib/ripple.js",
+            "js/lib/mastodon.js",
             "js/lib/ripple.helpers.js",
-            "js/lib/ripple.api.js",
             "js/lib/avalon.js",
             "js/common.js",
             "js/bg.js",

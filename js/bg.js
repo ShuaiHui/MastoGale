@@ -84,6 +84,12 @@ function stripHTML(str) {
 }
 
 chrome.runtime.onMessage.addListener(function(request, sender) {
+	if (request.action === 'login-success') {
+		PREFiX.accessToken = lscache.get('access_token');
+		PREFiX.account = lscache.get('account_details');
+		initialize();
+		return;
+	}
 	if (request.act === 'draw_attention') {
 		if (! sender || ! sender.tab || ! sender.tab.windowId) return;
 		chrome.windows.update(sender.tab.windowId, {
@@ -317,67 +323,20 @@ function updateDetails(flag) {
 }
 
 function checkBirthday() {
-	detectBirthday();
-	detectFanfouBirthday();
+	PREFiX.isTodayBirthday = false;
+	PREFiX.isTodayFanfouBirthday = false;
 }
 
 function detectFanfouBirthday() {
-	if (! PREFiX.account) return;
-	var now = new Date(Date.now() + Ripple.OAuth.timeCorrectionMsec);
-	var ff_birthday = new Date(Date.parse(PREFiX.account.created_at));
-	var year = ff_birthday.getFullYear();
-	var delta;
-	do {
-		delta = now - ff_birthday;
-	} while (delta > 0 && (ff_birthday.setFullYear(++year) || true));
-	ff_birthday.setFullYear(--year);
-	[ 'Milliseconds', 'Seconds', 'Minutes', 'Hours' ].
-	forEach(function(i) {
-		ff_birthday['set' + i](0);
-	});
-	ff_birthday.setHours(-(now.getTimezoneOffset() / 60 + 8));
-	delta = now - ff_birthday;
-	PREFiX.isTodayFanfouBirthday = delta >= 0 && delta < 24 * 60 * 60 * 1000;
-	if (PREFiX.isTodayFanfouBirthday) {
-		PREFiX.fanfouYears = (now - (new Date(Date.parse(PREFiX.account.created_at))))
-			/ 365 / 24 / 60 / 60 / 1000;
-	}
+	PREFiX.isTodayFanfouBirthday = false;
 }
 
 function detectBirthday() {
-	if (PREFiX.account && PREFiX.account.birthday) {
-		var birthday = PREFiX.account.birthday;
-		var now = new Date(Date.now() + Ripple.OAuth.timeCorrectionMsec);
-		var birth_month = +birthday.split('-')[1];
-		var birth_date = +birthday.split('-')[2];
-		if (birth_month && birth_date) {
-			if (birth_month === now.getMonth() + 1 &&
-				birth_date === now.getDate()) {
-				PREFiX.isTodayBirthday = true;
-				return;
-			}
-		}
-	}
 	PREFiX.isTodayBirthday = false;
 }
 
 function detectFriendBirthday() {
 	PREFiX.birthdayFriends = [];
-	var now = new Date(Date.now() + Ripple.OAuth.timeCorrectionMsec);
-	PREFiX.friends.forEach(function(friend) {
-		var birthday = friend.birthday;
-		var birth_month = +birthday.split('-')[1];
-		var birth_date = +birthday.split('-')[2];
-		if (birth_month && birth_date) {
-			if (birth_month === now.getMonth() + 1 &&
-				birth_date === now.getDate()) {
-				if (PREFiX.settings.current.birthdayNoticeType === 'friends_and_followers' ||
-					friend.following) {
-					PREFiX.birthdayFriends.push(friend);
-				}
-			}
-		}
-	});
 }
 
 var saved_searches_items = [];
@@ -1712,86 +1671,14 @@ function initialize() {
 		return;
 	}
 
-	var tab_id, tab_port;
-	Ripple.authorize.withPINCode(function(auth_url) {
-		var options = {
-			url: auth_url,
-			selected: true
-		};
-		var deferred = Deferred();
-
-		// 打开验证页面
-		ct.create(options, function(tab) {
-			if (typeof close === 'function') {
-				close();
-			}
-
-			ct.onUpdated.addListener(function onUpdated(id, info) {
-				// 等待用户点击 '授权' 后跳转至 PIN Code 页面
-				if (id !== tab.id) return;
-				tab_id = id;
-
-				// 继续验证操作
-				ct.executeScript(id, {
-					file: 'js/authorize.js'
-				}, function() {
-					// 等待页面传送 PIN Code
-					var port = ct.connect(id);
-					port.onMessage.addListener(function listenForPINCode(msg) {
-						var pin_code = msg.pinCode;
-						tab_port = port;
-						// 如果页面端没有拿到 PIN Code, 会传送 'rejected' 消息过来
-						deferred[pin_code == 'rejected' ? 'fail' : 'call'](pin_code);
-
-						ct.onUpdated.removeListener(onUpdated);
-						tab_port.onMessage.removeListener(listenForPINCode);
-					});
-				});
-
-				ct.insertCSS(id, {
-					code: '#retry { text-decoration: underline; }' +
-								'#retry:hover { cursor: pointer; }'
-				});
-			});
-
-		});
-
-		// 返回 Deferred, 当拿到 PIN Code 后会继续后面的操作
-		return deferred;
-	}).
-	next(function(token) {
-		// 成功拿到 access token
-		tab_port.postMessage({
-			type: 'authorize',
-			msg: 'success'
-		});
-
-		// 把 access token 缓存下来并重启程序
-		lscache.set('access_token', token);
-		PREFiX.accessToken = token;
-		initialize();
-
-		setTimeout(function() {
-			closeTab(tab_id);
-		}, 5000);
-	}).
-	error(function(error) {
-		if (Ripple.getConfig('dumpLevel') > 0) {
-			console.log(error);
-		}
-		if (tab_port) {
-			// 打开了验证页面, 却没有完成验证
-			tab_port.postMessage('failure');
-			tab_port.onMessage.addListener(function(msg) {
-				// 等待用户点击 '重试'
-				if (msg.type === 'authorize' && msg.msg === 'retry') {
-					closeTab(tab_id);
-					initialize();
-				}
-			});
-		} else {
-			// 可能由于网络错误, 导致验证地址没有成功获取
-			setTimeout(initialize, 60000);
+	var loginUrl = chrome.runtime.getURL('login.html');
+	var options = {
+		url: loginUrl,
+		selected: true
+	};
+	ct.create(options, function(tab) {
+		if (typeof close === 'function') {
+			close();
 		}
 	});
 
@@ -1933,6 +1820,10 @@ var playSound = (function() {
 })();
 
 function stripTags(html) {
+	if (typeof DOMParser === 'undefined') {
+		if (!html) return '';
+		return html.replace(/<[^>]*>/g, '');
+	}
 	var parser = new DOMParser();
 	var document = parser.parseFromString(html, 'text/html');
 	var text = document.body.textContent;
@@ -1941,6 +1832,12 @@ function stripTags(html) {
 }
 
 function stripTagsInsideAnchorElements(html) {
+	if (!html) return '';
+	if (typeof DOMParser === 'undefined') {
+		return html.replace(/<a\b[^>]*>(.*?)<\/a>/gi, function(match, inner) {
+			return match.replace(inner, inner.replace(/<[^>]*>/g, ''));
+		});
+	}
 	var parser = new DOMParser();
 	var document = parser.parseFromString(html, 'text/html');
 
@@ -1949,12 +1846,16 @@ function stripTagsInsideAnchorElements(html) {
 		var textNode = document.createTextNode(element.innerHTML);
 		element.replaceWith(textNode);
 	});
-	var html = document.body.innerHTML;
+	var htmlOutput = document.body.innerHTML;
 
-	return html;
+	return htmlOutput;
 }
 
 function processMentionLinks(html) {
+	if (!html) return '';
+	if (typeof DOMParser === 'undefined') {
+		return html;
+	}
 	var parser = new DOMParser();
 	var document = parser.parseFromString(html, 'text/html');
 
@@ -1965,9 +1866,9 @@ function processMentionLinks(html) {
 		anchor.title = `@${nickname} (${userid})`;
 		anchor.setAttribute('data-userid', userid);
 	});
-	html = document.body.innerHTML;
+	var htmlOutput = document.body.innerHTML;
 
-	return html;
+	return htmlOutput;
 }
 
 Ripple.events.observe('process_status', function processStatus(status) {
@@ -2191,7 +2092,7 @@ var usage_tips = [
 	'按 5 键显示自己的消息页面'
 ];
 
-var PREFiX = this.PREFiX = {
+var PREFiX = (typeof globalThis !== 'undefined' ? globalThis : this).PREFiX = {
 	version: chrome.runtime.getManifest().version,
 	is_mac: is_mac,
 	load: load,

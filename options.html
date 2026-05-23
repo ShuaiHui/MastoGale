@@ -7,6 +7,102 @@
 		<link rel="stylesheet" href="css/options.css"/>
 		<link rel="stylesheet" href="css/chrome-shared.css"/>
 		<script src="js/bootstrap-options.js"></script>
+		<style>
+			.account-item {
+				display: flex;
+				align-items: center;
+				padding: 12px 16px;
+				background: rgba(255, 255, 255, 0.02);
+				border: 1px solid rgba(255, 255, 255, 0.06);
+				border-radius: 8px;
+				margin-bottom: 10px;
+				gap: 12px;
+				transition: all 0.2s ease;
+			}
+			.account-item:hover {
+				background: rgba(255, 255, 255, 0.04);
+				border-color: rgba(255, 255, 255, 0.1);
+			}
+			.account-item img {
+				width: 42px;
+				height: 42px;
+				border-radius: 50%;
+				border: 1px solid rgba(255, 255, 255, 0.08);
+			}
+			.account-item-info {
+				flex: 1;
+				text-align: left;
+			}
+			.account-item-name {
+				font-weight: 600;
+				color: #fff;
+				font-size: 14px;
+				margin-bottom: 2px;
+			}
+			.account-item-instance {
+				font-size: 12px;
+				color: #94a3b8;
+			}
+			.account-active-badge {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				box-sizing: border-box;
+				background: rgba(16, 185, 129, 0.12);
+				color: #10b981;
+				border: 1px solid rgba(16, 185, 129, 0.25);
+				border-radius: 12px;
+				padding: 0 8px;
+				font-size: 11px;
+				font-weight: 600;
+				margin-right: 8px;
+				height: 20px;
+				line-height: 1;
+			}
+			.account-actions {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.account-btn {
+				-webkit-appearance: none;
+				appearance: none;
+				box-sizing: border-box;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				padding: 0 10px;
+				border-radius: 12px;
+				font-size: 11px;
+				font-weight: 600;
+				cursor: pointer;
+				transition: all 0.2s ease;
+				outline: none;
+				border: none;
+				margin: 0;
+				height: 20px;
+				line-height: 1;
+				vertical-align: middle;
+			}
+			.account-btn-switch {
+				background: rgba(99, 102, 241, 0.08);
+				color: #6366f1;
+				border: 1px solid rgba(99, 102, 241, 0.2);
+			}
+			.account-btn-switch:hover {
+				background: rgba(99, 102, 241, 0.16);
+				border-color: rgba(99, 102, 241, 0.35);
+			}
+			.account-btn-logout {
+				background: rgba(239, 68, 68, 0.08);
+				color: #ef4444;
+				border: 1px solid rgba(239, 68, 68, 0.2);
+			}
+			.account-btn-logout:hover {
+				background: rgba(239, 68, 68, 0.16);
+				border-color: rgba(239, 68, 68, 0.35);
+			}
+		</style>
 	</head>
 	<body>
 	<div id="wrapper">
@@ -27,8 +123,15 @@
 							<h2>基本设置</h2>
 						</header>
 						<ul>
-							<h3>账号</h3>
-							<li><span id="user-info">您已以 <a target="_blank" id="username"></a> 的身份登录. </span><br /><button id="switch-account">切换到另一个账号...</button></li>
+							<h3>账号管理 (多账号切换)</h3>
+							<li>
+								<div id="accounts-list-container">
+									<!-- Dynamically populated -->
+								</div>
+								<div style="margin-top: 15px;">
+									<button id="add-account" class="chrome-shared-btn">添加新的长毛象账号...</button>
+								</div>
+							</li>
 						</ul>
 						<ul>
 							<h3>界面</h3>
@@ -79,7 +182,7 @@
 								<label><input type="checkbox" key="notif_privatemsg" foldable-tgt="notification" />当收到私信时显示桌面通知</label>
 							</li>
 							<li foldable-tgt="notification">
-								<label><input type="checkbox" key="webFirst" foldable-tgt="notification" />当我使用网页版饭否时不要显示 @ 和私信通知</label>
+								<label><input type="checkbox" key="webFirst" foldable-tgt="notification" />当我使用网页版长毛象时不要显示 @ 和私信通知</label>
 							</li>
 							<li foldable-tgt="notification">
 								<label><input type="checkbox" key="notif_follower" foldable-tgt="notification" />当有新关注者时显示桌面通知</label>
@@ -104,6 +207,15 @@
 							</li>
 							<li foldable-tgt="autoStartup">
 								<label style="padding-left: 15px;"><input type="checkbox" key="autoMinimize" foldable-tgt="autoStartup" />自动以独立窗口模式打开后将其最小化</label>
+							</li>
+						</ul>
+						<ul id="debug-center-section" style="margin-top: 20px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
+							<h3>授权与网络调试中心</h3>
+							<li>
+								<button id="show-debug-logs" class="chrome-shared-btn" style="background: rgba(255,255,255,0.05); color: #ccc;">查看授权截获日志</button>
+								<button id="test-api-conn" class="chrome-shared-btn" style="background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); margin-left: 10px;">测试 API 联通性</button>
+								<button id="clear-debug-logs" class="chrome-shared-btn" style="background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); margin-left: 10px;">清除日志</button>
+								<pre id="debug-logs-display" style="display: none; margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; font-family: monospace; font-size: 11px; max-height: 250px; overflow-y: auto; white-space: pre-wrap; color: #a7f3d0; text-align: left;"></pre>
 							</li>
 						</ul>
 					</div>
@@ -147,7 +259,7 @@
 						</header>
 						<ul id="about-prefix">
 							<h4>PREFiX</h4>
-							<li>简洁、易用的 Chrome 饭否客户端</li>
+							<li>简洁、易用的 Chrome 长毛象客户端</li>
 						</ul>
 						<ul>
 							<li>从 <span id="install-time"></span> 到现在, 您一共使用 PREFiX 发送了 <span id="status-count"></span> 条消息和 <span id="photo-count"></span> 张照片. </li>
@@ -155,9 +267,9 @@
 						</ul>
 						<ul>
 							<li>版本 <span id="version"></span> (<a id="show-updates">查看更新历史</a>)</li>
-							<li>作者 <a href="https://fanfou.com/ruif" target="_blank">@锐风</a></li>
-							<li>基于开源项目 <a href="https://github.com/riophae/Ripple" target="_blank">Ripple</a> 开发. </li>
-							<li>感谢 <a href="https://fanfou.com/anegie" target="_blank">@太空小孩</a> 为 <a href="https://github.com/riophae/PREFiX" target="_blank">PREFiX</a> 设计了精致的 Logo. </li>
+							<li>作者 <a href="https://github.com/riophae" target="_blank">@锐风</a></li>
+							<li>基于开源项目 <a href="https://github.com/riophae/Ripple" target="_blank">Ripple</a> 与 Mastodon API 迁移重构开发. </li>
+							<li>感谢 <a href="https://github.com/riophae/PREFiX" target="_blank">@太空小孩</a> 为 <a href="https://github.com/riophae/PREFiX" target="_blank">PREFiX</a> 设计了精致的 Logo. </li>
 						</ul>
 					</div>
 					<div id="usage-tip-page" class="page">
@@ -177,7 +289,7 @@
 							<li>Shift + D 键删除 (Delete) 消息</li>
 							<li>F 键收藏 (Favorite), Shift + F 取消收藏</li>
 							<li>S 键在应用内查看用户信息 (Space), 按 Shift + S 键在前台标签打开该用户个人空间</li>
-							<li>U 键在后台标签打开该消息的饭否页面, 按 Shift + U 键在前台标签打开</li>
+							<li>U 键在后台标签打开该消息的长毛象页面, 按 Shift + U 键在前台标签打开</li>
 							<li>按空格键使输入框得到焦点, 再按空格键使输入框失去焦点</li>
 							<li>V 键放大图片或缩小图片 (View), Shift + V 键在前台标签打开原图</li>
 							<li>R 键旋转图片</li>

@@ -1,5 +1,4 @@
-var ce = chrome.extension;
-var bg_win = ce.getBackgroundPage() || window;
+var bg_win = window;
 var Ripple = bg_win.Ripple;
 var Deferred = bg_win.Deferred;
 var lscache = bg_win.lscache;
@@ -1570,10 +1569,21 @@ function checkCount() {
 	document.title = title;
 }
 
-function resetLoadingEffect() {
+function resetLoadingEffect(noMore) {
 	$('#loading').hide();
+	if (noMore) return;
 	setTimeout(function() {
-		$('#loading').show();
+		var current = getCurrent();
+		var listLength = 0;
+		if (current) {
+			if (current.statuses) listLength = current.statuses.length;
+			else if (current.messages) listLength = current.messages.length;
+		}
+		if (listLength >= 5) {
+			$('#loading').show();
+		} else {
+			$('#loading').hide();
+		}
 	}, 0);
 }
 
@@ -1724,6 +1734,9 @@ function loadOldder() {
 			}
 		}).next(function(statuses) {
 			push(usertl_model.statuses, statuses);
+			if (!statuses || statuses.length === 0) {
+				resetLoadingEffect(true);
+			}
 		});
 	} else if (model.statuses) {
 		var oldest_status = model.statuses[model.statuses.length - 1];
@@ -1741,6 +1754,9 @@ function loadOldder() {
 			}
 		}).next(function(statuses) {
 			push(model.statuses, statuses);
+			if (!statuses || statuses.length === 0) {
+				resetLoadingEffect(true);
+			}
 		});
 	} else {
 		var oldest_message = model.messages[model.messages.length - 1];
@@ -1758,6 +1774,9 @@ function loadOldder() {
 			}
 		}).next(function(messages) {
 			push(privatemsgs_model.messages, messages);
+			if (!messages || messages.length === 0) {
+				resetLoadingEffect(true);
+			}
 		});
 	}
 }
@@ -1972,9 +1991,9 @@ function blockUser(e) {
 			pattern: username,
 			type: 'name'
 		});
-		if (real_id) {
+		if (user && user.url) {
 			filters.push({
-				pattern: 'https://fanfou.com/' + real_id,
+				pattern: user.url,
 				type: 'content'
 			});
 		}
@@ -2020,6 +2039,15 @@ var nav_model = avalon.define('navigation', function(vm) {
 		if (vm.current == 'mentions_model' && $main.scrollTop())
 			return goTop(e);
 		last_model = PREFiX.current = vm.current = 'mentions_model';
+		
+		// Immediately clear unread mentions locally and save latest seen id
+		if (PREFiX.latest_notification_id) {
+			localStorage.setItem('last_seen_notification_id', PREFiX.latest_notification_id);
+		}
+		PREFiX.count.mentions = 0;
+		PREFiX.previous_count.mentions = 0;
+		PREFiX.update();
+
 		mentions_model.initialize();
 	}
 	vm.showPrivateMsgs = function(e) {
@@ -2027,6 +2055,15 @@ var nav_model = avalon.define('navigation', function(vm) {
 		if (vm.current == 'privatemsgs_model' && $main.scrollTop())
 			return goTop(e);
 		last_model = PREFiX.current = vm.current = 'privatemsgs_model';
+		
+		// Immediately clear unread DMs locally and save latest seen id
+		if (PREFiX.latest_notification_id) {
+			localStorage.setItem('last_seen_notification_id', PREFiX.latest_notification_id);
+		}
+		PREFiX.count.direct_messages = 0;
+		PREFiX.previous_count.direct_messages = 0;
+		PREFiX.update();
+
 		privatemsgs_model.initialize();
 	}
 	vm.showSavedSearches = function(e) {
@@ -2070,7 +2107,7 @@ var composebar_model = avalon.define('composebar-textarea', function(vm) {
 	vm.onfocus = function(e) {
 		var placeholder;
 		if (PREFiX.isTodayFanfouBirthday) {
-			placeholder = '还记得今天是什么日子吗? 祝你饭否 ' +
+			placeholder = '还记得今天是什么日子吗? 祝你长毛象 ' +
 				Math.floor(PREFiX.fanfouYears) +
 				' 周岁生日快乐! :)';
 		} else {

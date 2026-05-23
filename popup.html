@@ -40,14 +40,14 @@
 		<ul ms-controller="context-timeline" ms-each-status="statuses">
 		<li class="fix" ms-class-protected="status.user.protected">
 			<div class="avatar">
-			<a ms-title="{{status.user.name}} ({{status.user.id}})" ms-href="'https://fanfou.com/' + status.user.id">
+			<a ms-title="{{status.user.name}} ({{status.user.id}})" ms-href="status.user.url">
 				<img ms-src="status.user.profile_image_url_large" />
 			</a>
 			</div>
 			<div class="content">
 			<div class="info fix">
-				<a ms-href="'https://fanfou.com/' + status.user.id" class="name" ms-text="status.user.name"></a>
-				<a ms-href="'https://fanfou.com/statuses/' + status.id" ms-title="'消息链接 / ' + status.fullTime" class="permanent-link">#</a>
+				<a ms-href="status.user.url" class="name" ms-text="status.user.name"></a>
+				<a ms-href="status.url" ms-title="'消息链接 / ' + status.fullTime" class="permanent-link">#</a>
 				<span class="timestamp-client" ms-html="status.relativeTime + ' | ' + status.source"></span>
 			</div>
 			<div class="status-content" ms-html="status.fixedText"></div>
@@ -94,14 +94,14 @@
 							<a ms-live-click="toggleFavourite" ms-class="favourited: status.favorited" class="favourite" ms-title="status.favorited ? '取消收藏 (快捷键 Shift + F)' : '收藏 (快捷键 F)'"></a>
 						</div>
 						<div class="avatar">
-							<a ms-title="{{status.user.name}} ({{status.user.id}})" ms-href="'https://fanfou.com/' + status.user.id">
+							<a ms-title="{{status.user.name}} ({{status.user.id}})" ms-href="status.user.url">
 								<img ms-src="status.user.profile_image_url_large" ms-live-contextmenu="blockUser" />
 							</a>
 						</div>
 						<div class="content" ms-live-contextmenu="debug">
 							<div class="info fix">
 								<a class="name" ms-text="status.user.name" ms-data-userid="status.user.id" title="查看 TA 的消息 (快捷键 S)"></a>
-								<a ms-href="'https://fanfou.com/statuses/' + status.id" ms-title="'消息链接 (快捷键 U) / ' + status.fullTime" class="permanent-link">#</a>
+								<a ms-href="status.url" ms-title="'消息链接 (快捷键 U) / ' + status.fullTime" class="permanent-link">#</a>
 								<span class="timestamp-client" ms-html="status.relativeTime + ' | ' + status.source"></span>
 							</div>
 							<div class="status-content" ms-html="status.fixedText"></div>
@@ -123,14 +123,14 @@
 							<a ms-live-click="toggleFavourite" ms-class="favourited: status.favorited" class="favourite" ms-title="status.favorited ? '取消收藏 (快捷键 Shift + F)' : '收藏 (快捷键 F)'"></a>
 						</div>
 						<div class="avatar">
-							<a ms-title="{{status.user.name}} ({{status.user.id}})" ms-href="'https://fanfou.com/' + status.user.id">
+							<a ms-title="{{status.user.name}} ({{status.user.id}})" ms-href="status.user.url">
 								<img ms-src="status.user.profile_image_url_large" ms-live-contextmenu="blockUser" />
 							</a>
 						</div>
 						<div class="content">
 							<div class="info fix">
 								<a class="name" ms-text="status.user.name" ms-data-userid="status.user.id" title="查看 TA 的消息 (快捷键 S)"></a>
-								<a ms-href="'https://fanfou.com/statuses/' + status.id" ms-title="'消息链接 (快捷键 U) / ' + status.fullTime" class="permanent-link">#</a>
+								<a ms-href="status.url" ms-title="'消息链接 (快捷键 U) / ' + status.fullTime" class="permanent-link">#</a>
 								<span class="timestamp-client" ms-html="status.relativeTime + ' | ' + status.source"></span>
 							</div>
 							<div class="status-content" ms-html="status.fixedText"></div>
@@ -149,7 +149,7 @@
 							<a ms-live-click="reply" class="reply" title="回复 (快捷键 R)"></a>
 						</div>
 						<div class="avatar">
-							<a ms-title="{{message.sender.name}} ({{message.sender.id}})" ms-href="'https://fanfou.com/' + message.sender.id">
+							<a ms-title="{{message.sender.name}} ({{message.sender.id}})" ms-href="message.sender.url">
 								<img ms-src="message.sender.profile_image_url_large" ms-live-contextmenu="blockUser" />
 							</a>
 						</div>
@@ -177,14 +177,14 @@
 							<a ms-live-click="toggleFavourite" ms-class="favourited: status.favorited" class="favourite" ms-title="status.favorited ? '取消收藏 (快捷键 Shift + F)' : '收藏 (快捷键 F)'"></a>
 						</div>
 						<div class="avatar">
-							<a ms-title="{{status.user.name}} ({{status.user.id}})" ms-href="'https://fanfou.com/' + status.user.id">
+							<a ms-title="{{status.user.name}} ({{status.user.id}})" ms-href="status.user.url">
 								<img ms-src="status.user.profile_image_url_large" ms-live-contextmenu="blockUser" />
 							</a>
 						</div>
 						<div class="content">
 							<div class="info fix">
 								<a class="name" ms-text="status.user.name" ms-data-userid="status.user.id" title="查看 TA 的消息 (快捷键 S)"></a>
-								<a ms-href="'https://fanfou.com/statuses/' + status.id" ms-title="'消息链接 (快捷键 U) / ' + status.fullTime" class="permanent-link">#</a>
+								<a ms-href="status.url" ms-title="'消息链接 (快捷键 U) / ' + status.fullTime" class="permanent-link">#</a>
 								<span class="timestamp-client" ms-html="status.relativeTime + ' | ' + status.source"></span>
 							</div>
 							<div class="status-content" ms-html="status.fixedText" ms-class-bold="status.is_unread"></div>
@@ -203,7 +203,7 @@
 							<p class="statistics">{{ status.user.friends_count }} 好友 / {{ status.user.followers_count }} 关注者 / {{ status.user.statuses_count }} 条消息</p>
 						</div>
 						<div class="right avatar">
-							<a ms-href="https://fanfou.com/{{ status.user.id }}" ms-title="打开 TA 的个人主页">
+							<a ms-href="status.user.url" ms-title="打开 TA 的个人主页">
 								<img ms-src="status.user.profile_image_url_large" />
 							</a>
 						</div>
@@ -224,14 +224,14 @@
 							<a ms-live-click="toggleFavourite" ms-class="favourited: status.favorited" class="favourite" ms-title="status.favorited ? '取消收藏 (快捷键 Shift + F)' : '收藏 (快捷键 F)'"></a>
 						</div>
 						<div class="avatar">
-							<a ms-title="{{status.user.name}} ({{status.user.id}})" ms-href="'https://fanfou.com/' + status.user.id">
+							<a ms-title="{{status.user.name}} ({{status.user.id}})" ms-href="status.user.url">
 								<img ms-src="status.user.profile_image_url_large" ms-live-contextmenu="blockUser" />
 							</a>
 						</div>
 						<div class="content">
 							<div class="info fix">
 								<a class="name" ms-text="status.user.name" ms-data-userid="status.user.id" title="查看 TA 的消息 (快捷键 S)"></a>
-								<a ms-href="'https://fanfou.com/statuses/' + status.id" ms-title="'消息链接 (快捷键 U) / ' + status.fullTime" class="permanent-link">#</a>
+								<a ms-href="status.url" ms-title="'消息链接 (快捷键 U) / ' + status.fullTime" class="permanent-link">#</a>
 								<span class="timestamp-client" ms-html="status.relativeTime + ' | ' + status.source"></span>
 							</div>
 							<div class="status-content" ms-html="status.fixedText"></div>

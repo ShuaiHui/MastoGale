@@ -1,8 +1,8 @@
 {
 	"manifest_version": 3,
-	"name": "PREFiX",
+	"name": "MastoGale",
 	"version": "1.0.0",
-	"description": "简洁、易用的饭否客户端.",
+	"description": "简洁、易用的长毛象客户端.",
 	"icons": {
 		"256": "icons/256.png",
 		"128": "icons/128.png",
@@ -26,7 +26,7 @@
 			"19": "icons/19.png"
 		},
 		"default_popup": "popup.html",
-		"default_title": "PREFiX"
+		"default_title": "MastoGale"
 	},
 	"options_page": "options.html",
 	"omnibox": { "keyword": "f" },
@@ -39,37 +39,16 @@
 		"scripting"
 	],
 	"host_permissions": [
-		"http://fanfou.com/",
-		"https://fanfou.com/",
-		"http://*.fanfou.com/",
-		"https://*.fanfou.com/",
-		"http://*.sinaimg.cn/",
-		"https://*.sinaimg.cn/",
-		"https://*.xiaonei.com/",
-		"http://*.xiaonei.com/",
-		"https://*.yxlady.com/",
-		"http://*.yxlady.com/",
-		"https://*.duoshuo.com/",
-		"http://*.duoshuo.com/",
-		"https://img.xiami.net/",
-		"http://img.xiami.net/",
-		"https://*.sharetome.com/",
-		"http://*.sharetome.com/",
-		"https://*.qlogo.cn/",
-		"http://*.qlogo.cn/",
-		"https://*.douban.com/",
-		"http://*.douban.com/",
-		"http://riophae.github.io/",
-		"https://riophae.github.io/"
+		"<all_urls>"
 	],
 	"web_accessible_resources": [
 		{
-			"resources": ["manifest.json"],
+			"resources": ["manifest.json", "login.html"],
 			"matches": ["<all_urls>"]
 		}
 	],
 	"content_security_policy": {
-		"extension_pages": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://s3.meituan.net https://s3-img.meituan.net https://*.sinaimg.cn; connect-src 'self' data: https://fanfou.com https://*.fanfou.com"
+		"extension_pages": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; connect-src 'self' data: https: http:"
 	},
 	"minimum_chrome_version": "88"
 }

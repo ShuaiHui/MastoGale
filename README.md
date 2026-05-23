@@ -1,81 +1,75 @@
-PREFiX
-======
+# MastoGale
 
-**简洁、易用的饭否客户端**
+**简洁、优雅的长毛象（Mastodon）浏览器扩展客户端**
 
-**作者:** @锐风 https://fanfou.com/ruif
+> 基于 PREFiX 框架深度改造，完整适配 Mastodon API & Manifest V3 架构。
 
+---
 
-版本历史
-----
+## ✨ 功能特性
 
-**ver 0.1.0**
-* 自动智能压缩链接
-* 支持上传图片
-* 每 30s 自动刷新 Timeline 和获取未读@消息/私信数量
-* 在图标一角显示新通知数量和播放提示音
-* @自动补全
-* 支持查看@消息和私信收件箱
-* 显示 Emoji 表情
-* 自动向 Timeline 加载新消息
-* 记录 Timeline 阅读位置
-* 查看图片和消息上下文
-* 支持独立窗口模式运行
+- 🔐 **OAuth 2.0 动态注册登录**：支持任意 Mastodon 实例，自动完成应用注册与授权
+- 👥 **多账号管理**：一键添加、切换、退出多个 Mastodon 账号，会话无缝切换
+- 🏠 **主时间线**：实时拉取 Home Timeline，支持自动刷新与滚动定位记忆
+- 💬 **私信收件箱**：查看并发送私信（Direct Message）
+- 🔔 **提及（@消息）**：实时获取 @mentions，角标未读计数提醒
+- 🖼️ **图片预览**：内联查看媒体附件
+- ⭐ **收藏（Favourites）**：查看已加星标的嘟文
+- 🔁 **转发 / 点赞**：一键 Boost & Favourite
+- 🔔 **桌面通知**：后台检测新消息时弹出系统级通知并播放提示音
+- 🌗 **深色主题**：全局深色 UI，护眼舒适
+- ⌨️ **Vim 风格快捷键**：键盘流操作支持
 
-**ver 0.2.0**
-* 平滑滚动效果
-* 支持将粘贴板中的图像数据直接上传到饭否
+---
 
-**ver 0.3.0**
-* 自定义尾巴
-* 在地址栏查看 Timeline 和发布消息
-* 自动抛弃缓存功能 (改善性能)
-* 生日提醒
-* 界面放大功能
-* 显示使用技巧
-* 一键设置尾巴
-* 上传页面加入@自动补全
+## 🏗️ 技术架构
 
-**ver 0.4.0**
-* Retina 支持
-* 添加随便看看/关注的话题界面
-* 全新的设置界面
-* 点击用户名发送私信
-* 加载较多消息时显示加载时间点提示
-* 上传图片显示进度
+| 层级 | 技术选型 |
+|---|---|
+| 扩展规范 | Manifest V3（Chrome / Edge） |
+| 后台 | Service Worker（非持久化） |
+| 存储 | `chrome.storage.local` 异步代理 → 同步 `localStorage` Proxy |
+| API | Mastodon REST API v1 |
+| 登录 | OAuth 2.0 动态客户端注册 + OOB 授权码回调 |
+| UI 框架 | avalon.js（MV3 CSP 安全沙箱模板解释器） |
+| 通知 | `chrome.notifications` + Offscreen Document 音频播放 |
 
-**ver 0.5.0**
-* 查看收藏
-* 启动时打开 PREFiX 窗口
-* 扩展内搜索话题消息
-* 查看自己的消息
+---
 
-**ver 0.6.0**
-* Vim 风格快捷键支持
-* 可以调整提示音音量
-* 自动调整刷新频率
-* 智能滑动页面
-* 可以自定义缓存数量
-* 旋转图片功能
+## 🚀 安装使用
 
-**ver 0.7.0**
-* Streaming API 支持、实时推送桌面通知
-* 过滤消息
-* 应用内查看用户个人页面
-* 自定义转发格式
-* 全自动展开短链接、应用内预览第三方内容
+1. 克隆或下载本仓库
+2. 打开 Edge / Chrome，进入 `edge://extensions/`（或 `chrome://extensions/`）
+3. 开启「开发者模式」，点击「加载已解压的扩展程序」
+4. 选择本项目根目录即可
+5. 点击扩展图标 → 输入你的 Mastodon 实例域名（如 `mast.dragon-fly.club`）→ 授权登录
 
-**ver 0.8.0**
-* 增加虾米封面显示和一键打开虾米播放器功能
-* 大幅优化滚动性能, 解决消息较多时滚动卡顿的问题
+---
 
-**ver 1.0.0 (Manifest V3 完美适配版)**
-* **全面迁移至 Manifest V3 架构**：完美适配 Chrome 2025 MV2 停用时间线，升级扩展安全性与性能。
-* **后台 Service Worker 重构**：将原有的 Persistent Background Page 重构为非持久化 Service Worker，降低了内存占用。
-* **MV3 存储兼容垫片**：为 Popup 和 Options 页面构建了基于 `chrome.storage.local` 异步加载的同步 `localStorage` Proxy 代理，确保老版本用户数据的平滑过渡。
-* **安全沙箱模板表达式解释器**：实现了一套符合 MV3 CSP（无 `'unsafe-eval'` 限制）的轻量级 avalon.js 模板表达式解释器，完美兼容原项目的数据双向绑定语法（`ms-duplex` 等）。
-* **Service Worker 网络垫片**：实现了 `MockXMLHttpRequest`，使用 `fetch()` 重新封装以替代 Service Worker 中已被剔除的 `XMLHttpRequest`，完美适配 OAuth 1.0a 签名验证库 `ripple.js`。
-* **声音与通知适配**：引入 Offscreen Document 解决 Service Worker 下原生 DOM 播放 `dongdong.mp3` 的限制，并采用 `chrome.notifications` 重构了桌面通知弹窗，修复了原生 `Notification` 构造器报错。
-* **竞态与稳定性修复**：完美修复了 Popup 在 MV3 独立作用域下的各种 DOM Ready 初始化竞态报错、滚动条位置抖动，并移除了 avalon.js 内部的 `setTimeout("string")` 动态求值警告。
+## 📋 版本历史
 
-基于开源项目 [Ripple](https://github.com/riophae/Ripple), [Avalon](https://github.com/RubyLouvre/avalon), [jQuery](https://github.com/jquery/jquery) 开发.
+### v1.1.0（MastoGale 长毛象版）
+- 迁移至 **Mastodon** 平台，完整适配 Mastodon REST API
+- 实现 **OAuth 2.0 动态注册**与 OOB 授权码自动捕获流程
+- 新增 **多账号管理**界面：添加、切换、退出账号
+- 修复 Service Worker 严格模式顶层 `this` 崩溃（Status code 15）
+- 修复 `DOMParser` 在 Service Worker 上下文不可用问题（regex 引擎替代）
+- 修复 MV3 `chrome.extension.getBackgroundPage()` 为 `null` 的崩溃
+- 美化登录页：实例推荐下拉、手动输入授权码双轨兜底
+
+### v1.0.0（Manifest V3 完美适配版）
+- 全面迁移至 Manifest V3 架构，适配 Chrome 2025 MV2 停用时间线
+- 后台 Service Worker 重构，降低内存占用
+- MV3 存储兼容垫片：`chrome.storage.local` 同步 Proxy
+- 安全沙箱模板解释器：兼容 `ms-duplex` 等 avalon.js 语法（无 `unsafe-eval`）
+- `MockXMLHttpRequest`：`fetch()` 封装替代 SW 中已移除的 `XMLHttpRequest`
+- Offscreen Document 音频播放 + `chrome.notifications` 桌面通知重构
+
+---
+
+## 🙏 致谢
+
+基于开源项目深度改造：
+- [PREFiX / Ripple](https://github.com/riophae/Ripple)（原始框架）
+- [avalon.js](https://github.com/RubyLouvre/avalon)（MVVM 数据绑定）
+- [jQuery](https://github.com/jquery/jquery)

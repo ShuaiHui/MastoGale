@@ -201,8 +201,17 @@ function fixStatusList(statuses) {
 		return ! status.filtered_out;
 	});
 	return statuses.sort(function(status_a, status_b) {
-		return status_a.rawid ?
-		 (status_b.rawid - status_a.rawid) : (+status_b.id - +status_a.id);
+		if (status_a.rawid && status_b.rawid) {
+			return status_b.rawid - status_a.rawid;
+		}
+		var id_a = String(status_a.id);
+		var id_b = String(status_b.id);
+		if (id_b.length !== id_a.length) {
+			return id_b.length - id_a.length;
+		}
+		if (id_b > id_a) return 1;
+		if (id_b < id_a) return -1;
+		return 0;
 	});
 }
 
