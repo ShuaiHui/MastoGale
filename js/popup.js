@@ -2770,9 +2770,8 @@ searches_model.initialize = function() {
 		});
 
 		var $search = $('<option />');
-		$search.text('搜索');
+		$search.text('搜索...');
 		$search.prop('value', '##SEARCH##');
-		$search.prop('disabled', true);
 		$selector.append($search);
 
 		$selector.val('##PUBLIC_TIMELINE##');
@@ -2786,9 +2785,23 @@ searches_model.initialize = function() {
 				searches_model.keyword = '';
 				showFavorites();
 			} else if (this.value === '##SEARCH##') {
-				searches_model.keyword = searches_model.search_keyword;
-				delete searches_model.search_keyword;
-				search();
+				if (searches_model.search_keyword) {
+					var kw = searches_model.search_keyword;
+					searches_model.keyword = kw;
+					delete searches_model.search_keyword;
+					$selector.find('option[value="##SEARCH##"]').text('搜索: ' + kw);
+					search();
+				} else {
+					var kw = prompt('请输入搜索关键词:');
+					if (kw && kw.trim()) {
+						var keyword = kw.trim();
+						searches_model.keyword = keyword;
+						$selector.find('option[value="##SEARCH##"]').text('搜索: ' + keyword);
+						search();
+					} else {
+						$selector.val('##PUBLIC_TIMELINE##').trigger('change');
+					}
+				}
 			} else {
 				searches_model.keyword = this.value;
 				search();
@@ -2806,6 +2819,7 @@ searches_model.initialize = function() {
 
 	var $selector = $('#topic-selector');
 	if (searches_model.search_keyword) {
+		$selector.find('option[value="##SEARCH##"]').text('搜索: ' + searches_model.search_keyword);
 		$selector.val('##SEARCH##');
 	} else if (last) {
 		$selector.val(searches_model.keyword);

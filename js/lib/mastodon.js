@@ -313,6 +313,67 @@
             });
         },
 
+        showUser: function(params) {
+            var self = this;
+            var userId = params.id;
+            var d = new Deferred();
+            
+            d.setupAjax = function(opts) {
+                return d;
+            };
+
+            var userUrl = self.instanceUrl.replace(/\/$/, '') + '/api/v1/accounts/' + userId;
+            var relUrl = self.instanceUrl.replace(/\/$/, '') + '/api/v1/accounts/relationships?id[]=' + userId;
+            var headers = { 'Authorization': 'Bearer ' + self.token };
+
+            Promise.all([
+                fetch(userUrl, { headers: headers }).then(function(res) { return res.json(); }),
+                fetch(relUrl, { headers: headers }).then(function(res) { return res.json(); }).catch(function() { return []; })
+            ]).then(function(results) {
+                var userJson = results[0];
+                var relJson = results[1] || [];
+                var rel = relJson[0] || {};
+
+                var u = mapUser(userJson);
+                if (u) {
+                    u.following = rel.following || false;
+                    u.status = (userJson.statuses_count > 0) ? {} : null;
+                }
+                d.call(u);
+            }).catch(function(err) {
+                d.fail({ status: 500, message: err.message });
+            });
+
+            return d;
+        },
+
+        showRelationshipById: function(targetId, sourceId) {
+            var self = this;
+            var d = new Deferred();
+            d.setupAjax = function() { return d; };
+
+            var relUrl = self.instanceUrl.replace(/\/$/, '') + '/api/v1/accounts/relationships?id[]=' + targetId;
+            var headers = { 'Authorization': 'Bearer ' + self.token };
+
+            fetch(relUrl, { headers: headers })
+                .then(function(res) { return res.json(); })
+                .then(function(json) {
+                    var rel = json[0] || {};
+                    d.call({
+                        relationship: {
+                            source: {
+                                following: rel.followed_by ? 'true' : 'false'
+                            }
+                        }
+                    });
+                })
+                .catch(function(err) {
+                    d.fail({ status: 500, message: err.message });
+                });
+
+            return d;
+        },
+
         showStatus: function(params) {
             return this._request('GET', '/api/v1/statuses/' + params.id, null, {
                 mapper: mapStatus
