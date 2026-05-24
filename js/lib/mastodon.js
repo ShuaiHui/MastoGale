@@ -521,6 +521,16 @@
             });
         },
 
+        getTrendingStatuses: function(params) {
+            var query = { limit: 40 };
+            if (params && params.offset) query.offset = params.offset;
+            return this._request('GET', '/api/v1/trends/statuses', query, {
+                mapper: function(json) {
+                    return json.map(mapStatus).filter(Boolean);
+                }
+            });
+        },
+
         addFriend: function(params) {
             var userId = params.id;
             return this._request('POST', '/api/v1/accounts/' + userId + '/follow', null, {

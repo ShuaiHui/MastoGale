@@ -1764,12 +1764,11 @@ function loadOldder() {
 				resetLoadingEffect(true);
 			}
 		});
-	} else {
-		var oldest_message = model.messages[model.messages.length - 1];
-		if (! oldest_message) return;
-		var id = oldest_message.id;
-		r.showInbox({
-			max_id: id
+	} else if (model === privatemsgs_model) {
+		var oldest_status = model.statuses[model.statuses.length - 1];
+		if (! oldest_status) return;
+		r.getTrendingStatuses({
+			offset: model.statuses.length
 		}).setupAjax({
 			lock: loadOldder,
 			send: function() {
@@ -1778,9 +1777,9 @@ function loadOldder() {
 			oncomplete: function() {
 				loading = false;
 			}
-		}).next(function(messages) {
-			push(privatemsgs_model.messages, messages);
-			if (!messages || messages.length === 0) {
+		}).next(function(statuses) {
+			push(privatemsgs_model.statuses, statuses);
+			if (!statuses || statuses.length === 0) {
 				resetLoadingEffect(true);
 			}
 		});
@@ -2503,67 +2502,17 @@ mentions_model.unload = function() {
 var privatemsgs_model = avalon.define('privatemsgs', function(vm) {
 	vm.current = PREFiX.privatemsgs.current;
 
-	vm.remove = function() {
-		cancelReply();
-		showNotification('正在删除..')
-		var current_model = privatemsgs_model;
-		var current = current_model.current;
-		var next;
-		var index = -1;
-		if (current) {
-			current_model.messages.some(function(message, i) {
-				if (message.id === current) {
-					index = i;
-					return true;
-				}
-			});
-			if (index === current_model.messages.length - 1) {
-				index--;
-			}
-		}
-		var self = this;
-		var message_id = self.$vmodel.message.id;
-		r.destroyDirectMessage({
-			id: message_id
-		}).setupAjax({
-			lock: self
-		}).error(function(e) {
-			if (e.status !== 404) {
-				throw e;
-			}
-		}).next(function() {
-			showNotification('删除成功!');
-			var $item = $(self);
-			$item.parents('.status').
-			css('animation', 'remove .4s linear');
-			$item.parents('li').
-			slideUp(function() {
-				self.$vmodel.$remove();
-				setTimeout(function() {
-					if (index >= 0) {
-						setCurrent(current_model, current_model.messages[index].id);
-					}
-				});
-			});
-		});
-	}
+	vm.remove = remove;
 
-	vm.reply = function() {
-		cancelReply();
-		var message = this.$vmodel.message;
-		composebar_model.text = '';
-		composebar_model.type = 'reply-pm';
-		composebar_model.id = message.id;
-		composebar_model.user = message.sender.id;
-		composebar_model.username = message.sender.name;
-		$textarea.focus();
-		privatemsgs_model.is_replying = true;
-		message.current_replied = true;
-	}
+	;[ 'reply', 'repost' ].forEach(function(type) {
+		vm[type] = generateMethod(type);
+	});
+
+	vm.toggleFavourite = toggleFavourite;
 
 	vm.blockUser = blockUser;
 
-	vm.messages = [];
+	vm.statuses = [];
 
 	vm.scrollTop = 0;
 
@@ -2578,61 +2527,26 @@ privatemsgs_model.$watch('is_replying', function(value) {
 privatemsgs_model.$watch('scrollTop', function(value) {
 	PREFiX.privatemsgs.scrollTop = value;
 });
-privatemsgs_model.messages.$watch('length', function() {
-	PREFiX.privatemsgs.messages = privatemsgs_model.$model.messages.map(function(m) {
-		return m.$model || m;
+privatemsgs_model.statuses.$watch('length', function() {
+	PREFiX.privatemsgs.statuses = privatemsgs_model.$model.statuses.map(function(s) {
+		return s.$model || s;
 	});
 });
-privatemsgs_model.messages.$watch('length', onNewStatusInserted);
+privatemsgs_model.statuses.$watch('length', onNewStatusInserted);
 privatemsgs_model.initialize = function() {
 	$('#navigation-bar .privatemsgs').addClass('current');
-	$('#title h2').text('Private Messages');
+	$('#title h2').text('Trends');
 	$('#privatemsgs').addClass('current');
 
-	function check() {
-		if (! PREFiX.is_popup_focused || $main[0].scrollTop) return;
-		if (PREFiX.count.direct_messages) {
-			update();
-		}
-	}
-
 	function update() {
-		var ajax;
-		if (privatemsgs.messages.length) {
-			var messages = fixStatusList(privatemsgs.messages);
-			ajax = PREFiX.getDataSince('showInbox', messages[0].id, update, null, 45);
-		} else {
-			ajax = r.showInbox().setupAjax({
-				lock: update
-			});
-		}
-		ajax.next(function(messages) {
-			if (privatemsgs_model.messages.length) {
-				if (messages.length) {
-					var scroll_top = $main.scrollTop();
-					insertKeepScrollTop(function() {
-						unshift(privatemsgs_model.messages, messages);
-					}, function() {
-						if (! scroll_top) {
-							autoScroll(privatemsgs_model, messages);
-						}
-					});
-				}
-			} else {
-				privatemsgs_model.messages = fixStatusList(messages);
-				resetLoadingEffect();
-			}
-			PREFiX.update();
+		r.getTrendingStatuses().next(function(statuses) {
+			privatemsgs_model.statuses = statuses;
+			resetLoadingEffect();
 		});
 	}
 
-	var privatemsgs = PREFiX.privatemsgs;
-	if (! privatemsgs_model.messages.length ||
-		privatemsgs_model.messages.length !== privatemsgs.messages.length ||
-		privatemsgs_model.messages[0].id !== privatemsgs.messages[0].id) {
-		privatemsgs_model.messages = privatemsgs.messages;
-	}
-	$main.scrollTop(privatemsgs.scrollTop);
+	update();
+	$main.scrollTop(0);
 	initKeyboardControl();
 	updateRelativeTime();
 	update();
