@@ -1935,10 +1935,10 @@ Ripple.events.addGlobalObserver('after', function(data, e) {
 	if (! e || e.type !== 'after.ajax_success')
 		return;
 	e = e.srcEvent;
-	if (! e) return;
-	if (e.url === 'https://api.fanfou.com/statuses/update.json') {
+	if (! e || ! e.url) return;
+	if (e.url.indexOf('/api/v1/statuses') !== -1 || e.url.indexOf('statuses/update.json') !== -1) {
 		lscache.set('status_count', getStatusCount() + 1);
-	} else if (e.url === 'https://api.fanfou.com/photos/upload.json') {
+	} else if (e.url.indexOf('/api/v1/media') !== -1 || e.url.indexOf('photos/upload.json') !== -1) {
 		lscache.set('photo_count', getPhotoCount() + 1);
 	}
 });
