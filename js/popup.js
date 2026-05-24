@@ -2890,7 +2890,11 @@ usertl_model.initialize = function() {
 			}).next(function(statuses) {
 				unshift(usertl_model.statuses, statuses);
 				getRealId(user.name, user.id, function(id) {
-					usertl_model.statuses[0].user.id = id;
+					if (usertl_model.statuses[0] && usertl_model.statuses[0].user) {
+						usertl_model.statuses[0].user.id = id;
+						usertl_model.statuses[0].user.following = user.following;
+						usertl_model.statuses[0].is_self = false;
+					}
 				});
 				setTimeout(initKeyboardControl);
 				if (following) {
@@ -2905,7 +2909,7 @@ usertl_model.initialize = function() {
 				}
 			});
 		} else {
-			var statuses = [ { id: 0, user: user } ];
+			var statuses = [ { id: 0, user: user, is_self: false } ];
 			usertl_model.statuses = statuses;
 			$relationship.prop('title', following ? '取消关注' : '');
 		}

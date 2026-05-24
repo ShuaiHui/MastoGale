@@ -67,6 +67,18 @@
         var is_reblog = !!status.reblog;
         var targetStatus = is_reblog ? status.reblog : status;
         
+        var activeAccountId = '';
+        try {
+            if (Global.PREFiX && Global.PREFiX.account && Global.PREFiX.account.id) {
+                activeAccountId = String(Global.PREFiX.account.id);
+            } else {
+                var cached = localStorage.getItem('lscache-account_details');
+                if (cached) {
+                    activeAccountId = String(JSON.parse(cached).id);
+                }
+            }
+        } catch(e){}
+
         var mapped = {
             id: targetStatus.id,
             created_at: targetStatus.created_at,
@@ -78,6 +90,7 @@
             in_reply_to_user_id: targetStatus.in_reply_to_account_id,
             user: mapUser(targetStatus.account),
             url: targetStatus.url,
+            is_self: targetStatus.account ? (String(targetStatus.account.id) === activeAccountId) : false,
             photo: (targetStatus.media_attachments && targetStatus.media_attachments.length > 0) ? {
                 thumburl: targetStatus.media_attachments[0].preview_url || targetStatus.media_attachments[0].url,
                 largeurl: targetStatus.media_attachments[0].url
