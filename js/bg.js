@@ -294,7 +294,6 @@ function onInputEntered(text) {
 // 	return d;
 // }
 
-var birthday_interval;
 function updateDetails(flag) {
 	if (! PREFiX.accessToken) return;
 	var user = Ripple(PREFiX.accessToken);
@@ -306,9 +305,6 @@ function updateDetails(flag) {
 		}
 		is_first_run = false;
 		PREFiX.account = details;
-		clearInterval(birthday_interval);
-		birthday_interval = setInterval(checkBirthday, 60000);
-		checkBirthday();
 	});
 	if (flag) {
 		// 延时重试
@@ -320,23 +316,6 @@ function updateDetails(flag) {
 		});
 	}
 	return verify;
-}
-
-function checkBirthday() {
-	PREFiX.isTodayBirthday = false;
-	PREFiX.isTodayFanfouBirthday = false;
-}
-
-function detectFanfouBirthday() {
-	PREFiX.isTodayFanfouBirthday = false;
-}
-
-function detectBirthday() {
-	PREFiX.isTodayBirthday = false;
-}
-
-function detectFriendBirthday() {
-	PREFiX.birthdayFriends = [];
 }
 
 var saved_searches_items = [];
@@ -877,10 +856,7 @@ function loadFriends() {
 			});
 		})(1);
 	});
-	dl = new Deferred.parallel(dl).next(function() {
-		detectFriendBirthday();
-		setInterval(detectFriendBirthday, 60 * 60 * 1000);
-	});
+	dl = new Deferred.parallel(dl);
 }
 
 function getNaturalDimentions(url, callback) {
@@ -1578,7 +1554,6 @@ function unload() {
 	if (! PREFiX.loaded) return;
 	clearInterval(PREFiX.interval);
 	clearInterval(init_interval);
-	clearInterval(birthday_interval);
 	PREFiX.loaded = false;
 	PREFiX.user = PREFiX.account = null;
 	stopStreamingAPI();
@@ -2003,9 +1978,6 @@ var settings = {
 	default: {
 		playSound: true,
 		smoothScroll: ! is_mac,
-		birthdayNotice: true,
-		birthdayNoticeType: 'only_friends',
-		birthdayGreetingType: 'post_status',
 		autoFlushCache: false,
 		cacheAmount: 75,
 		drawAttention: ! is_mac,
@@ -2016,7 +1988,6 @@ var settings = {
 		holdCtrlToSubmit: false,
 		notification: true,
 		notif_mention: true,
-		notif_privatemsg: true,
 		notif_follower: true,
 		notif_friendreq: false,
 		notif_favourite: true,
@@ -2040,7 +2011,6 @@ var settings = {
 		lscache.set('settings', settings.current);
 	},
 	onSettingsUpdated: function() {
-		detectFriendBirthday();
 		initSavedSearches();
 		batchProcess(function(view) {
 			view.filterOutAllLists && view.filterOutAllLists();
@@ -2058,12 +2028,11 @@ var usage_tips = [
 	'按 Ctrl + Enter 或双击输入框即可发送消息. ',
 	'点击 PREFiX 回到页面顶部或刷新. ',
 	'在地址栏输入 f 按空格键, 然后输入内容按回车即可直接发送消息. ',
-	'按 1/2/3/4 键在 首页/提到我的/私信/随便看看和关注的话题 页面间切换. ',
-	'左击上下文图标展开回复和转发, 右击显示上下文消息. ',
+	'按 1/2/3/4 键在 首页/提到我的/热门嘟文/随便看看和关注的话题 页面间切换. ',
+	'左击上下文图标展开回复 and 转发, 右击显示上下文消息. ',
 	'右击消息中的图片, 将在后台新标签打开大图. ',
 	'将鼠标指针放在用户头像或消息中提到的名字上, 可以显示用户 ID. ',
 	'窗口模式运行时最小化, 当有新消息时任务栏图标会闪烁. ',
-	'如果饭友生日提醒打扰了您, 可以在设置页关闭. ',
 	'如果您不希望 PREFiX 播放提示音, 可以在设置页关闭. ',
 	'PREFiX 页面关闭前保持滚动条在顶端可让程序性能更佳. ',
 	'当输入框中字数超过 140 时, 输入框背景将显示为淡红色. ',
@@ -2072,20 +2041,19 @@ var usage_tips = [
 	'按 Home/End 键可以快速滑动到页面顶端/末端. ',
 	'您可以自定义尾巴 (即通过...发送), 详情请见设置页. ',
 	'独立窗口模式运行时, 您可以纵向拖拽窗口调整大小. ',
-	'点击生日提醒中的用户名可以发送私信. ',
 	'',
-	'如果您希望删除消息或私信, 请<b>双击</b>删除图标. ',
+	'如果您希望删除消息, 请<b>双击</b>删除图标. ',
 	'您可以在设置页开启浏览器启动时自动打开 PREFiX 窗口功能. ',
 	'',
 	'如果您觉得提示音音量过大, 可以在设置页调整音量. ',
 	'您可以使用 Vim 风格的快捷键操作 PREFiX, 详见设置页. ',
 	'您可以在扩展管理页面末端给 PREFiX 设置快捷键, 从而使用快捷键直接打开 PREFiX 页面. ',
 	'如果您发现 PREFiX 启动时容易卡顿, 建议开启自动抛弃缓存功能, 并设置保留在缓存中的最大消息数量. ',
-	'将鼠标指针放在饭友名字后面的 # 上时, 可以查看消息的完整发布时间, 点击将打开消息在饭否的页面. ',
+	'将鼠标指针放在用户名字后面的 # 上时, 可以查看消息的完整发布时间, 点击将打开消息在长毛象的页面. ',
 	'如果您习惯使用双击选中文本, 请在设置页中开启 "只有按住 Ctrl / Command 键才能双击输入框发送消息". ',
 	'如果您希望查看完整的使用技巧, 参见设置页. ',
 	'如果您希望旋转图片, 请按快捷键 R 键. ',
-	'点击用户名在应用内打开个人消息页面, 点击头像打开该用户的饭否个人页面. ',
+	'点击用户名在应用内打开个人消息页面, 点击头像打开该用户的长毛象个人页面. ',
 	'您可以自由定义转发时消息的格式, 详见设置页. ',
 	'您可以在设置页中设置过滤消息的规则, 也可以按住 Shift 键右击用户头像来屏蔽 TA. ',
 	'点击链接 (或回车) 时按住 Shift 键在前台标签页打开, 否则为后台标签页. ',

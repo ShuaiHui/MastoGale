@@ -79,9 +79,9 @@
 				transition: all 0.2s ease;
 				outline: none;
 				border: none;
-				margin: 0;
-				height: 20px;
-				line-height: 1;
+				margin: 0 !important;
+				height: 20px !important;
+				line-height: 1 !important;
 				vertical-align: middle;
 			}
 			.account-btn-switch {
@@ -148,26 +148,13 @@
 								<span id="playSound"></span>
 							</li>
 							<li>
-								<label><input type="checkbox" key="playSound" />有新的未读 @ 消息或未读私信时播放提示音</label>
+								<label><input type="checkbox" key="playSound" />有新的未读 @ 消息时播放提示音</label>
 							</li>
 							<li>
-								<label><input type="checkbox" key="drawAttention" />Timeline 上有新消息时闪烁任务栏图标 (禁用后有新@和私信时仍会闪烁)</label>
+								<label><input type="checkbox" key="drawAttention" />Timeline 上有新消息时闪烁任务栏图标 (禁用后有新 @ 消息时仍会闪烁)</label>
 							</li>
 							<li>
 								<label><input type="checkbox" key="showSavedSearchCount" />关注的话题有新消息时在图标上显示统计数字</label>
-							</li>
-							<li>
-								<label>
-									<input type="checkbox" key="birthdayNotice" />好友生日提醒
-								</label>
-								<select key="birthdayNoticeType" type="select">
-									<option value="only_friends">仅我关注的人</option>
-									<option value="friends_and_followers">我关注的人和粉丝</option>
-								</select>
-								<select key="birthdayGreetingType" type="select">
-									<option value="post_status">发送消息</option>
-									<option value="send_pm">发送私信</option>
-								</select>
 							</li>
 						</ul>
 						<ul>
@@ -179,10 +166,7 @@
 								<label><input type="checkbox" key="notif_mention" foldable-tgt="notification" />当我被 @ 时显示桌面通知</label>
 							</li>
 							<li foldable-tgt="notification">
-								<label><input type="checkbox" key="notif_privatemsg" foldable-tgt="notification" />当收到私信时显示桌面通知</label>
-							</li>
-							<li foldable-tgt="notification">
-								<label><input type="checkbox" key="webFirst" foldable-tgt="notification" />当我使用网页版长毛象时不要显示 @ 和私信通知</label>
+								<label><input type="checkbox" key="webFirst" foldable-tgt="notification" />当我使用网页版长毛象时不要显示 @ 消息通知</label>
 							</li>
 							<li foldable-tgt="notification">
 								<label><input type="checkbox" key="notif_follower" foldable-tgt="notification" />当有新关注者时显示桌面通知</label>
