@@ -1172,20 +1172,24 @@ function initMainUI() {
 		hidePicture();
 	}).delegate('#relationship', 'click', function(e) {
 		var $this = $(e.currentTarget);
-		if (! usertl_model.following) {
+		if ($this.text() === '关注 TA') {
 			r.addFriend({
 				id: PREFiX.userid
 			}).next(function(user) {
-				usertl_model.following = true;
+				$this.text(user.following ? '已关注' : '已发出关注请求');
 				$this.prop('title', '取消关注');
+				if (usertl_model.statuses[0] && usertl_model.statuses[0].user) {
+					usertl_model.statuses[0].user.following = true;
+				}
 			});
 		} else {
 			r.removeFriend({
 				id: PREFiX.userid
 			}).next(function(user) {
-				usertl_model.following = false;
-				usertl_model.mutual = false;
-				$this.prop('title', '');
+				$this.text('关注 TA').prop('title', '');
+				if (usertl_model.statuses[0] && usertl_model.statuses[0].user) {
+					usertl_model.statuses[0].user.following = false;
+				}
 			})
 		}
 	}).delegate('.xiami-player', 'click', function(e) {
@@ -2866,12 +2870,6 @@ var usertl_model = avalon.define('user-timeline', function(vm) {
 	vm.statuses = [];
 
 	vm.is_replying = false;
-
-	vm.is_self = false;
-
-	vm.following = false;
-
-	vm.mutual = false;
 });
 usertl_model.statuses.$watch('length', onNewStatusInserted);
 usertl_model.initialize = function() {
@@ -2888,10 +2886,6 @@ usertl_model.initialize = function() {
 		var following = user.following;
 		var $relationship = $('#relationship');
 		
-		usertl_model.is_self = user.id === PREFiX.account.id;
-		usertl_model.following = following;
-		usertl_model.mutual = false;
-
 		if (user.protected && ! user.following) {
 			user.error = '该用户没有公开 TA 的消息. ';
 		} else if (! user.status) {
@@ -2914,7 +2908,7 @@ usertl_model.initialize = function() {
 					r.showRelationshipById(user.id, PREFiX.account.id).
 					next(function(result) {
 						if (JSON.parse(result.relationship.source.following)) {
-							usertl_model.mutual = true;
+							$('#relationship').text('互相关注');
 						} else {
 							$relationship.prop('title', '取消关注');
 						}
@@ -2922,7 +2916,7 @@ usertl_model.initialize = function() {
 				}
 			});
 		} else {
-			var statuses = [ { id: 0, user: user, is_self: false } ];
+			var statuses = [ { id: 0, user: user } ];
 			usertl_model.statuses = statuses;
 			$relationship.prop('title', following ? '取消关注' : '');
 		}

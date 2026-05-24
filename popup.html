@@ -199,7 +199,7 @@
 				<div ms-if="$first" id="user-profile">
 					<li id="name-avatar" class="fix">
 						<div class="left">
-							<p class="name"><b>{{ status.user.name }}</b> ({{ status.user.id }}) <span ms-if="! is_self" id="relationship">{{ mutual ? '互相关注' : (following ? '已关注' : '关注 TA') }}</span></p>
+							<p class="name"><b>{{ status.user.name }}</b> ({{ status.user.id }}) <span ms-if="status.user.id !== PREFiX.account.id" id="relationship">{{ status.user.following ? '已关注' : '关注 TA' }}</span></p>
 							<p class="statistics">{{ status.user.friends_count }} 好友 / {{ status.user.followers_count }} 关注者 / {{ status.user.statuses_count }} 条消息</p>
 						</div>
 						<div class="right avatar">
