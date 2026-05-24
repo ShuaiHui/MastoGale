@@ -1204,8 +1204,12 @@ html.panel-mode #new-window {
 	line-height: 150%;
 }
 #name-avatar p {
-	height: 24px;
-	line-height: 24px;
+	min-height: 24px;
+	line-height: 1.4;
+	margin-bottom: 4px;
+}
+#name-avatar p:last-child {
+	margin-bottom: 0;
 }
 #relationship {
 	opacity: .5;
