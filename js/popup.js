@@ -1172,18 +1172,20 @@ function initMainUI() {
 		hidePicture();
 	}).delegate('#relationship', 'click', function(e) {
 		var $this = $(e.currentTarget);
-		if ($this.text() === '关注 TA') {
+		if (! usertl_model.following) {
 			r.addFriend({
 				id: PREFiX.userid
 			}).next(function(user) {
-				$this.text(user.following ? '已关注' : '已发出关注请求');
+				usertl_model.following = true;
 				$this.prop('title', '取消关注');
 			});
-		} else if ($this.text() === '已关注') {
+		} else {
 			r.removeFriend({
 				id: PREFiX.userid
 			}).next(function(user) {
-				$this.text('关注 TA').prop('title', '');
+				usertl_model.following = false;
+				usertl_model.mutual = false;
+				$this.prop('title', '');
 			})
 		}
 	}).delegate('.xiami-player', 'click', function(e) {
@@ -2864,6 +2866,12 @@ var usertl_model = avalon.define('user-timeline', function(vm) {
 	vm.statuses = [];
 
 	vm.is_replying = false;
+
+	vm.is_self = false;
+
+	vm.following = false;
+
+	vm.mutual = false;
 });
 usertl_model.statuses.$watch('length', onNewStatusInserted);
 usertl_model.initialize = function() {
@@ -2879,6 +2887,11 @@ usertl_model.initialize = function() {
 		fixUser(user);
 		var following = user.following;
 		var $relationship = $('#relationship');
+		
+		usertl_model.is_self = user.id === PREFiX.account.id;
+		usertl_model.following = following;
+		usertl_model.mutual = false;
+
 		if (user.protected && ! user.following) {
 			user.error = '该用户没有公开 TA 的消息. ';
 		} else if (! user.status) {
@@ -2901,7 +2914,7 @@ usertl_model.initialize = function() {
 					r.showRelationshipById(user.id, PREFiX.account.id).
 					next(function(result) {
 						if (JSON.parse(result.relationship.source.following)) {
-							$('#relationship').text('互相关注');
+							usertl_model.mutual = true;
 						} else {
 							$relationship.prop('title', '取消关注');
 						}
