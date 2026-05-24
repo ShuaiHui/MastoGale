@@ -2900,7 +2900,6 @@ usertl_model.initialize = function() {
 					if (usertl_model.statuses[0] && usertl_model.statuses[0].user) {
 						usertl_model.statuses[0].user.id = id;
 						usertl_model.statuses[0].user.following = user.following;
-						usertl_model.statuses[0].is_self = false;
 						usertl_model.statuses.set(0, usertl_model.statuses[0]);
 					}
 				});
